@@ -1,4 +1,4 @@
-import LocalizedStrings from 'localized-strings'
+import { type LocalizedStrings } from 'localized-strings'
 import env from '@/config/env.config'
 import * as UserService from '@/services/UserService'
 
