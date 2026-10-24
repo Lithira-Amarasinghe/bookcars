@@ -46,16 +46,34 @@ export default ({ mode }: { mode: string }) => {
     server: {
       host: '0.0.0.0',
       port: Number.parseInt(process.env.VITE_PORT || '3002', 10),
+      allowedHosts: ['.cursorvm.com', '.agent.cvm.dev'],
+      proxy: {
+        '/api': {
+          target: 'http://127.0.0.1:4002',
+          changeOrigin: true,
+          cookieDomainRewrite: '',
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              // Preview pages are not localhost, but the API treats
+              // Origin as the app identity (cookie name and CORS).
+              proxyReq.setHeader('origin', 'http://localhost:3002')
+            })
+          },
+        },
+        '/cdn': { target: 'http://127.0.0.1:4002', changeOrigin: true },
+      },
       watch: {
         usePolling: true,
         interval: 500,
       },
-      hmr: {
-        protocol: 'ws',
-        host: process.env.VITE_HMR_HOST || 'localhost',
-        port: Number.parseInt(process.env.VITE_HMR_PORT || '8080', 10),
-        clientPort: Number.parseInt(process.env.VITE_HMR_CLIENT_PORT || '8080', 10),
-      },
+      hmr: process.env.VITE_HMR_HOST
+        ? {
+            protocol: 'ws',
+            host: process.env.VITE_HMR_HOST,
+            port: Number.parseInt(process.env.VITE_HMR_PORT || '8080', 10),
+            clientPort: Number.parseInt(process.env.VITE_HMR_CLIENT_PORT || '8080', 10),
+          }
+        : undefined,
     },
 
     build: {
